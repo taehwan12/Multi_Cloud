@@ -1,0 +1,36 @@
+# AWS 및 NCP 웹 서버 인스턴스에 공통으로 복제할 배포 디렉토리 수립
+mkdir -p ~/multi-cloud-web && cd ~/multi-cloud-web
+
+# 멀티 클라우드 통합 메인 인덱스 파일 정의
+cat << 'EOF' > index.html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>4RSENAL Multi-Cloud Global Architecture</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; margin-top: 150px; background: #f4f7f6; }
+        .container { border: 2px solid #00c73c; padding: 30px; display: inline-block; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { color: #0052cc; } /* AWS Blue & NCP Green 하이브리드 매칭 */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>☁️ AWS x Naver Cloud Platform 하이브리드 가동 인프라</h1>
+        <p>글로벌 액티브-액티브 고가용성 로드 밸런싱 아키텍처 검증 성공</p>
+        <p style="color: #666;">Managed by 4RSENAL DevOps Group</p>
+    </div>
+</body>
+</html>
+EOF
+
+# Nginx 구동용 배포 Dockerfile 설계
+cat << 'EOF' > Dockerfile
+FROM nginx:alpine
+COPY index.html /usr/share/nginx/html/index.html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+EOF
+
+# 로컬 Docker 이미지 빌드 및 테스트 run
+docker build -t multi-web:latest .
+docker run -d -p 80:80 --name global-web-service multi-web:latest

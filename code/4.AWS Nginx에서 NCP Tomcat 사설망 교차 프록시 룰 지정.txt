@@ -1,0 +1,23 @@
+# AWS 퍼블릭 서브넷에 위치한 Nginx의 가상 호스트 설정 수정
+sudo cat << 'EOF' | sudo tee /etc/nginx/conf.d/multi_proxy.conf
+upstream ncp_tomcat_cluster {
+    # VPN 터널을 통해 직접 직통 통신할 NCP 프라이빗 WAS 서버의 사설 IP 명시
+    server 192.168.10.50:8080 max_fails=3 fail_timeout=10s;
+    server 192.168.20.50:8080 max_fails=3 fail_timeout=10s;
+}
+
+server {
+    listen 80;
+    server_name www.4rsenal-global.store;
+
+    location /api {
+        # VPN 게이트웨이 파이프라인을 타고 이기종 클라우드로 백엔드 트래픽 토스
+        proxy_pass http://ncp_tomcat_cluster;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+EOF
+
+sudo nginx -t && sudo systemctl restart nginx

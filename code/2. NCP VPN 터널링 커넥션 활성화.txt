@@ -1,0 +1,6 @@
+# NCP 측 VPN 게이트웨이 생성 및 AWS VPN 엔드포인트 공인 IP 바인딩 매핑
+# (NCP는 콘솔 및 전용 CLI 도구를 통해 하이브리드 커넥션을 수립)
+ncp-cli vpc createVpnGateway --vpcNo *** --vpnGatewayName 4RSENAL-NCP-GW
+
+# NCP 가상 라우팅 테이블에 AWS 사설 대역(예: 10.250.0.0/16) 타겟 게이트웨이 매핑 등록
+# destination: 10.250.0.0/16 -> target: VpnGateway

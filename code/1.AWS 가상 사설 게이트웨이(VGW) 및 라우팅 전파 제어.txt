@@ -1,0 +1,8 @@
+# 1. AWS 측 가상 사설 게이트웨이(VGW) 생성 및 VPC 연결 확인
+aws ec2 create-vpn-gateway --type ipsec.1 --region ap-northeast-2
+
+# 2. NCP VPN 게이트웨이 공인 IP(예: 211.249.xx.xx)를 커스터머 게이트웨이(CGW)로 등록
+aws ec2 create-customer-gateway --type ipsec.1 --public-ip 211.249.xx.xx --bgp-asn 65000
+
+# 3. AWS 라우팅 테이블에 NCP 사설 대역(예: 192.168.0.0/16)으로 향하는 라우팅 정책 수동 추가
+aws ec2 create-route --route-table-id rtb-aws-private --destination-cidr-block 192.168.0.0/16 --gateway-id vgw-xxxxxx

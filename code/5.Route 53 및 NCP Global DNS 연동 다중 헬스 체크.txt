@@ -1,0 +1,20 @@
+# 각 클라우드 로드 밸런서(AWS ALB / NCP NLB)의 엔드포인트를 타겟으로 바인딩 유도
+
+# AWS Route 53 장애 조치(Failover) 라우팅 정책 CLI 검증 세트
+# 주 서버(Primary): AWS ALB / 부 서버(Secondary): NCP NLB 구조 세팅 후 강제 헬스 체크 다운 모의 테스트
+
+# 1. 의도적으로 AWS 웹 컨테이너 다운을 유도하여 상태 이상(Unhealthy) 유발
+docker stop global-web-service
+
+# 2. 로컬 터미널에서 DNS 레코드 변경 추적 및 Failover 우회 동작 트래픽 질의
+while true; do 
+  curl -s -o /dev/null -w "%{http_code} -> Remote IP: %{remote_ip}\n" http://www.4rsenal-global.store; 
+  sleep 2; 
+done
+
+# [로그 출력 예시]
+# 200 -> Remote IP: 13.125.xx.xx (AWS ALB 라우팅 중)
+# 200 -> Remote IP: 13.125.xx.xx
+# (AWS 컨테이너 Down 발생 시점)
+# 000 -> Remote IP: 13.125.xx.xx (Health Check Fail 감지 주기)
+# 200 -> Remote IP: 211.249.xx.xx (NCP NLB 공인 IP로 DNS 라우팅 자동 우회 체결 완료)
